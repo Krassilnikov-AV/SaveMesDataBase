@@ -1,13 +1,13 @@
-
 package lab4gr1.web;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.annotation.Resource;
+import javax.annotation.Resource;     // 
 import javax.ejb.EJB;
-import javax.jms.Connection;
-import javax.jms.JMSException;
+import javax.jms.Connection;        // активное подключением клиента к поставщику JMS
+import javax.jms.JMSException;      // 
 import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
@@ -21,7 +21,7 @@ import lab4gr1.ejb.MessageBeanLocal;
 
 /**
  *
- * @author Alexk
+ *
  */
 @WebServlet(name = "Messanger", urlPatterns = {"/Messanger"})
 public class Messanger extends HttpServlet {
@@ -29,53 +29,76 @@ public class Messanger extends HttpServlet {
     @EJB
     private MessageBeanLocal messageBean;
 
-  @Resource(mappedName="jms/textmessageFactory")
-  private QueueConnectionFactory textFactory;
-  @Resource(mappedName="jms/textmessage")
-   private Queue textQueue;
-  
+    @Resource(mappedName = "jms/textmessageFactory")
+    private QueueConnectionFactory textFactory;
+    @Resource(mappedName = "jms/textmessage")
+    private Queue textQueue;
+
+    @Resource(mappedName = "jms/nummessageFactory")  // название ресурса который создавали в GlassFish
+    private QueueConnectionFactory numFactory;    // контейнер, который управляет ресурсом
+    @Resource(mappedName = "jms/nummessage")
+    private Queue numQueue;
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");       // распознавание русского текста
+// распознавание русского текста        
+        request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
-        String info = request.getParameter("message");       //
-        String choice = request.getParameter("choice");      //
+// получение параметра с jsp файла, обобщенное (может быть и число и текст)               
+        String info = request.getParameter("message");    // поле ввода 
+        String choice = request.getParameter("choice");      // 
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet Messanger</title>");            
+            out.println("<title>Servlet Messanger</title>");
             out.println("</head>");
-            out.println("<body>"); 
+            out.println("<body>");
             out.println("<h1>Servlet Messanger at " + request.getContextPath() + "</h1>");
-            out.println("<h1>ПОлучена информация" + info + "</h1>");
-            if("text".equals(choice)) {
-                out.println("<h1>Это должен быть текст</h1>");
-           
-                Connection conn;
-                Session session;
-                 try {
-                conn = textFactory.createConnection();
-                session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);    // false - отсутствие транзакций, режим автоподтверждения
-                 MessageProducer mp = (MessageProducer)session.createProducer(textQueue);
-                 TextMessage tm = session.createTextMessage(info);      // передача текста из формы
-                 mp.send(tm);
-                     out.println("<h1>Сообщение отправлено</h1>");
-                     mp.close();
-                     session.close(); 
-                     conn.close();
-                 } catch (JMSException ex) {
-                out.println("<h1>Проблема с отправкой сообщения</h1>");                 
-            }
+            out.println("<h1>Получена информация: " + info + "</h1>");
+               request.setAttribute(info, info);
+            Connection conn;
+            Session session;
+            if ("text".equals(choice)) {
+                out.println("<h1>It must be a text</h1>");
+// обработка текстового сообщения            
+                try {
+                    conn = textFactory.createConnection();
+                    session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);    // false - отсутствие транзакций, режим автоподтверждения
+                    MessageProducer mp = (MessageProducer) session.createProducer(textQueue);
+                    TextMessage tm = session.createTextMessage(info);      // передача текста из формы
+                    mp.send(tm);
+                    out.println("<h1>Your messager is entered</h1>");
+                    mp.close();
+                    session.close();
+                    conn.close();
+                } catch (JMSException ex) {
+                    out.println("<h1>Problem sending the value</h1>");
+                }
             } else {
-                out.println("<h1>Это должно быть число</h1>");
+                out.println("<h1>It must be a number</h1>");
+// обработка числовых значений
+                try {
+                    conn = numFactory.createConnection();          // 
+                    session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                    MessageProducer mp = (MessageProducer) session.createProducer(numQueue);
+                    ObjectMessage tm = session.createObjectMessage(info);      // передача текста из формы
+                    mp.send(tm);
+// если не выкинет исключение, то...              
+                    out.println("<h1> Your number is entered </h1>");
+                    mp.close();
+                    session.close();
+                    conn.close();
+                } catch (JMSException ex) {
+                    out.println("<h1>Problem sending the value </h1>");
+                }
             }
-             out.println("<h1>Сообщения из базы:</h1>");
+            out.println("<h1>Сообщения из базы: </h1>");
       String[] messages = messageBean.getMessageList();
       for(String m : messages) {
           out.println("<h2>" + m + "/<h2>");
-      }            
+                 }            
             out.println("</body>");
             out.println("</html>");
         }
