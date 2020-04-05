@@ -1,4 +1,3 @@
-
 package lab4gr1.ejb;
 
 import java.io.Serializable;
@@ -13,14 +12,18 @@ import javax.persistence.Table;
 
 /**
  *
- * @author Alexk
+ *
  */
 @Entity
 @Table
-@NamedQueries(@NamedQuery(name="Smessage.getAll",query="SELECT e FROM Smessage e"))
+// запрос на извлечение всех сообщений
+@NamedQueries(
+        @NamedQuery(name = "Smessage.getAll", query = "SELECT e FROM Smessage e"))
+
+// класс - таблица как
 public class Smessage implements Serializable {
 
-    private static final long serialVersionUID = 1L;  
+    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
@@ -34,7 +37,7 @@ public class Smessage implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
-    
+
     public Integer getId() {
         return id;
     }
@@ -52,7 +55,7 @@ public class Smessage implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+
         if (!(object instanceof Smessage)) {
             return false;
         }
@@ -67,5 +70,4 @@ public class Smessage implements Serializable {
     public String toString() {
         return "lab4gr1.ejb.Smessage[ id=" + id + " ]";
     }
-    
 }
