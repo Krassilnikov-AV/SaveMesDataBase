@@ -17,10 +17,13 @@ public class MessageBean implements MessageBeanLocal {
     private DataSource ds;           //
     @PersistenceContext             //Выражает зависимость от управляемого контейнером EntityManager и связанного с ним контекста персистентности.
     private EntityManager em;       // Интерфейс, используемый для взаимодействия с контекстом постоянства.
- //   private EntityManager emn;     // 
+    //   private EntityManager emn;     // 
 // обращение к классу - таблице Smessage и извлечение списка из таблицы
+/*    метод getMessageList позволяет обратиться к этому классу-таблице и получить список
+    всех записей этой таблицы и вернуть это список тому кто обратился к этому методу
+     */
     @Override
-    public String[] getMessageList() {   
+    public String[] getMessageList() {
         System.out.println(" Вызван метод getMessageList()");
         List<Smessage> list;                      // создание списка 
 
@@ -35,24 +38,45 @@ public class MessageBean implements MessageBeanLocal {
         return array;
     }
 
+    /**
+     * Нужно создать класс на подобии Smessage. В нем сделать именнованный
+     * запрос в базу, который возвращает сразу сумму всех чисел. А в классе
+     * MessageBean в методе getSum нужно вытаскивать эту сумму на подобии как в
+     * методе getMessageList, но только использовать не getResultList, а
+     * getSingleResult, так как нам нужно вытащить всего одну сумму, а не список
+     */
     @Override
-    public Integer[] getSumm() {
-        System.out.println("Вызван метод long GetSumm()");
-
+    public Integer[] getLitsSumm() {
+        System.out.println("Вызван метод Integer[] getSumm()");
         List<Nmessage> nlist;
-        
         nlist = (List<Nmessage>) em.createNamedQuery("Nmessage.getAll").getResultList();
         Integer[] numarr = new Integer[nlist.size()];
-        int i=0;
-        for(Nmessage nm : nlist) {
-            numarr[i++] = nm.getMessage();
+        int i = 0;
+        for (Nmessage sm : nlist) {
+            numarr[i++] = sm.getMessage();
         }
-         System.out.println("метод getSumm() завершился " + numarr);
-        
+        System.out.println("метод getMessageList() завершился " + numarr);
         return numarr;
     }
+
+    @Override
+    public int getSumm() {
+        System.out.println("Вызван метод int getSumm()");
+        List<Nmessage> nlist;
+        nlist = (List<Nmessage>) em.createNamedQuery("Nmessage.getAll").getResultList();
+        int[] numarr = new int[nlist.size()];
+        int i = 0;
+        for (Nmessage sm : nlist) {
+            numarr[i++] = sm.getMessage();
+        }
+        int summ = 0;
+        for (int j = 0; j < numarr.length; j++) {
+            summ += numarr[j];
+        }
+        return summ;
+       }
+
 // метод сохранения в БД строковых сообщений 
-    
     @Override
     public void addSmessage(Smessage message) {
         em.persist(message);            // 
@@ -60,6 +84,6 @@ public class MessageBean implements MessageBeanLocal {
 
     @Override
     public void addNmessage(Nmessage message) {
-        em.persist(message);        // persist(Object entity) делает экземпляр управляемым и постоянным.  
+        em.persist(message);     // persist(Object entity) делает экземпляр управляемым и постоянным.  
     }
 }
