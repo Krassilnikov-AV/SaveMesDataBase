@@ -21,7 +21,7 @@ import lab4gr1.ejb.MessageBeanLocal;
 
 /**
  *
- *
+ * Сервлет
  */
 @WebServlet(name = "Messanger", urlPatterns = {"/Messanger"})
 public class Messanger extends HttpServlet {
@@ -30,9 +30,9 @@ public class Messanger extends HttpServlet {
     private MessageBeanLocal messageBean;
 
     @Resource(mappedName = "jms/textmessageFactory")
-    private QueueConnectionFactory textFactory;
+    private QueueConnectionFactory textFactory;       //
     @Resource(mappedName = "jms/textmessage")
-    private Queue textQueue;
+    private Queue textQueue;           // строковое представление объекта
 
     @Resource(mappedName = "jms/nummessageFactory")  // название ресурса который создавали в GlassFish
     private QueueConnectionFactory numFactory;    // контейнер, который управляет ресурсом
@@ -47,8 +47,11 @@ public class Messanger extends HttpServlet {
 // получение параметра с jsp файла, обобщенное (может быть и число и текст)               
         String info = request.getParameter("message");    // поле ввода 
         String choice = request.getParameter("choice");      // 
+// добавление кнопок получения списка сообщений и суммы значений        
+        //       boolean list = request.getParameter("listmess") == null;
+        boolean summ = request.getParameter("addmess") != null;
+
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
@@ -57,18 +60,21 @@ public class Messanger extends HttpServlet {
             out.println("<body>");
             out.println("<h1>Servlet Messanger at " + request.getContextPath() + "</h1>");
             out.println("<h1>Получена информация: " + info + "</h1>");
-               request.setAttribute(info, info);
-            Connection conn;
-            Session session;
+            request.setAttribute(info, info);
+            Connection conn;   // цели соединения: 
+            // 1. инкапсулирует открытое соединение с провайдером JMS. Обычно он представляет собой открытый сокет TCP / IP
+            //между клиентом и программным обеспечением поставщика услуг.                          
+            Session session;     // 
             if ("text".equals(choice)) {
                 out.println("<h1>It must be a text</h1>");
 // обработка текстового сообщения            
                 try {
                     conn = textFactory.createConnection();
                     session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);    // false - отсутствие транзакций, режим автоподтверждения
-                    MessageProducer mp = (MessageProducer) session.createProducer(textQueue);
+                    MessageProducer mp = (MessageProducer) session.createProducer(textQueue); // Создает MessageProducer для отправки сообщений в указанный пункт назначения.
                     TextMessage tm = session.createTextMessage(info);      // передача текста из формы
-                    mp.send(tm);
+                    mp.send(tm);              // отправка полученного собщения
+
                     out.println("<h1>Your messager is entered</h1>");
                     mp.close();
                     session.close();
@@ -82,10 +88,11 @@ public class Messanger extends HttpServlet {
                 try {
                     conn = numFactory.createConnection();          // 
                     session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                    MessageProducer mp = (MessageProducer) session.createProducer(numQueue);
+                    MessageProducer mp = (MessageProducer) session.createProducer(numQueue);   //отправка сообщений в пункт назначения. 
                     ObjectMessage tm = session.createObjectMessage(info);      // передача текста из формы
                     mp.send(tm);
-// если не выкинет исключение, то...              
+// если не выкинет исключение, то...
+
                     out.println("<h1> Your number is entered </h1>");
                     mp.close();
                     session.close();
@@ -95,10 +102,24 @@ public class Messanger extends HttpServlet {
                 }
             }
             out.println("<h1>Сообщения из базы: </h1>");
-      String[] messages = messageBean.getMessageList();
-      for(String m : messages) {
-          out.println("<h2>" + m + "/<h2>");
-                 }            
+            if ("text".equals(choice)) {           // если значение поля "текст", тогда создается список из базы текстовых сообщений
+                String[] messages = messageBean.getMessageList();
+                for (String m : messages) {
+                    out.println("<h2>" + m + "/<h2>");
+                }
+            } else if ("number".equals(choice)) {                             // иначе создается список из базы чисел
+// возвращение списка чисел             
+                Integer[] message = messageBean.getLitsSumm();
+                for (Integer m : message) {
+
+                    out.println("<h2>" + m + "/<h2>");
+                }
+// возвращение суммы всех введенных чисел
+
+                int total = messageBean.getSumm();               
+                out.println( "<h2>"+ "total: " + total + "/<h2>");
+            }
+
             out.println("</body>");
             out.println("</html>");
         }
