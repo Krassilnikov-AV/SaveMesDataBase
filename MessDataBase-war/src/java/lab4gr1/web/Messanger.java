@@ -51,7 +51,8 @@ public class Messanger extends HttpServlet {
         //       boolean list = request.getParameter("listmess") == null;
         boolean summ = request.getParameter("total") != null;
         boolean list = request.getParameter("list") != null;
-   
+     
+
         try (PrintWriter out = response.getWriter()) {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
