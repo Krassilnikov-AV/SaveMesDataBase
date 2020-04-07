@@ -32,17 +32,7 @@ public class NumMessageBean implements MessageListener {
     public void onMessage(Message message) {
         System.out.println("the onMessage() method is called");   // оповещение вызова
 // преобразование типа
-/*
-ObjectMessage om = (ObjectMessage)message;
-int num = 0;
-try {
-num = Integer.parseInt((String)om.getObject());
-System.out.println("Получено сообщение: " + num);
-Nmessage nm = new Nmessage();
-nm.setMessage(num);
-messageBean.addNmessage(nm);
-*/   
-
+ 
 ObjectMessage tm = (ObjectMessage) message;
         int number = 0;
         try {
