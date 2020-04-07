@@ -25,14 +25,21 @@
             <h4>Use for string message </h4>
             <input type="text" name="message" value="" />
             <input type="hidden" name="choice" value="text" />
-            <input type="submit" value="Отправить" name="send" />            
+            <input type="submit" value="Отправить" name="send" />  
+            <input type="submit" value="Результат" name="list" /> 
         </form>
         
         <form action="Messanger">
             <h4>Use for number message </h4>
             <input type="text" name="message" value=""/>
             <input type="hidden" name="choice" value="number"/>
-            <input type="submit" value="Отправить" name="send" />            
+            <input type="submit" value="Отправить" name="send" />
+            <input type="submit" value="Результат" name="total" />
         </form>    
+        
+         <% String result = (String)request.getAttribute("result");
+        if (result != null)
+        out.println("<h2>"+ result +"</h2>");    
+    %>
     </body>
 </html>
