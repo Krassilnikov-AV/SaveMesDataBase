@@ -12,7 +12,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
- *
+ * Класс Smessage непосредственно работает с БД 
+ * 
  * @author Alexk
  */
 @Entity
